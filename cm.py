@@ -107,7 +107,7 @@ def add_file(path, filelist):
 def parse_args(args):
     """returns the arguments the user gave"""
     parser = argparse.ArgumentParser(description='manage a cad project')
-    parser.add_argument('command', choices=['add', 'remove'],
+    parser.add_argument('command', choices=['add', 'remove', 'new'],
                         help='the cm command to run')
     parser.add_argument('options', nargs='*',
                         help='options for the command to take')
@@ -164,6 +164,10 @@ def add(options):
                 #add file to filelist
                 add_file(fileloc, filelist)
 
+def new(options):
+    """makes a new part and its part file"""
+    pass
+
 def debug():
     partlist = openpartlist()
     part = Part()
@@ -183,6 +187,8 @@ def main():
         add(args.options)
     elif args.command == 'remove':
         print('this will remove')
+    elif args.command == 'new':
+        print('make a new part')
     else:
         raise UserWarning('invalid argument: ' + args.command)
 
