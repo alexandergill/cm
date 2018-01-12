@@ -43,10 +43,10 @@ def openpartlist():
     """opens and returns PARTLIST for reading and writing"""
     # TODO: read file after open and initialise if empty
     if os.path.isfile(PARTLIST):
-        return open(PARTLIST, 'a+')
+        return open(PARTLIST, 'a+', newline='')
     else:
         # no partlist, so create one
-        partlist = open(PARTLIST, 'a+')
+        partlist = open(PARTLIST, 'a+', newline='')
         import csv
         writer = csv.writer(partlist)
         writer.writerow(PARTLISTFORMAT)
@@ -56,10 +56,10 @@ def openfilelist():
     """opens and returns FILELIST for reading and writing"""
     # TODO: read file after open and initialise if empty
     if os.path.isfile(FILELIST):
-        return open(FILELIST, 'a+')
+        return open(FILELIST, 'a+', newline='')
     else:
         # no partlist, so create one
-        filelist = open(FILELIST, 'a+')
+        filelist = open(FILELIST, 'a+', newline='')
         import csv
         writer = csv.writer(filelist)
         writer.writerow(FILELISTFORMAT)
@@ -164,7 +164,7 @@ def add(options):
                 #add file to filelist
                 add_file(fileloc, filelist)
 
-def new(options):
+def build(options):
     """makes a new part and its part file"""
     pass
 
