@@ -75,8 +75,11 @@ def exists(string, csvfile, column):
 
     # search entire partlist for partnumber in collumn partnumber_loc
     for entry in reader:
-        if entry[column] == string:
-            return True
+        try:
+            if entry[column] == string:
+                return True
+        except IndexError: # column is not in this row. ignore
+            pass
 
     return False
 
