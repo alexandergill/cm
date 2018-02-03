@@ -97,15 +97,15 @@ def add_part(part, partlist):
         writer.writerow([part.partnumber, part.description, part.location,
                          part.status])
 
-def add_file(path, filelist):
-    """adds a file to filelist, adds new part if does not exist"""
+def add_file(path, partnumber, filelist):
+    """adds a file to filelist"""
     # check if file is already in FILELIST
     if not exists(path, filelist, FILELISTFORMAT.index(PATH)):
         import csv
         writer = csv.writer(filelist)
         # add to end of filelist
         filelist.seek(0, os.SEEK_END)
-        writer.writerow([path, 'deadbeef'])
+        writer.writerow([path, partnumber])
 
 def parse_args(args):
     """returns the arguments the user gave"""
@@ -165,20 +165,11 @@ def add(options):
 
                     add_part(part, partlist)
                 #add file to filelist
-                add_file(fileloc, filelist)
+                add_file(fileloc, part.partnumber, filelist)
 
 def build(options):
-    """makes a new part and its part file"""
+    """puts all active files into /build and generates bill of materials"""
     pass
-
-def debug():
-    partlist = openpartlist()
-    part = Part()
-    part.partnumber = 'foob'
-    part.description = 'bar'
-    part.location = 'foo/bar/foob.par'
-    part.activate()
-    add_part(part, partlist)
 
 def main():
     """execute when not being loaded as a library"""
