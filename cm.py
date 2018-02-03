@@ -173,20 +173,20 @@ def build(options):
 
 def main():
     """execute when not being loaded as a library"""
-    print(sys.argv[1:])
-    args = parse_args(sys.argv[1:])
-    print(args.command)
-    print(args.options)
-    if args.command == 'add':
-        add(args.options)
-    elif args.command == 'build':
-        print('not yet implemented')
-    elif args.command == 'remove':
-        print('not yet implemented')
-    elif args.command == 'new':
-        print('not yet implemented')
-    else:
-        raise UserWarning('invalid argument: ' + args.command)
+    try:
+        command = sys.argv[1]
+        if command == 'add':
+            add(sys.argv[2:])
+        elif command == 'build':
+            print('not yet implemented')
+        elif command == 'remove':
+            print('not yet implemented')
+        elif command == 'new':
+            print('not yet implemented')
+        else:
+            raise UserWarning('no such argument')
+    except (IndexError, UserWarning):
+        print('usage error')
 
 if __name__ == "__main__":
     main()
