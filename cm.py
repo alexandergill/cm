@@ -26,12 +26,15 @@ FILELISTFORMAT = [PATH, PARTNUMBER]
 SOURCEDIR = 'source'
 EXTENSIONS = ['.par', '.pdf', '.dft']
 
+NEWPASTA = 'overwrite this file with a part file'
+
 class Part:
     """a single part"""
-    partnumber = 'DEADBEEF'
-    description = 'uninitialised part'
-    location = ''
-    status = 'active'
+    def __init__(self):
+        self.partnumber = ''
+        self.description = 'uninitialised part'
+        self.location = ''
+        self.status = 'active'
     def activate(self):
         """set the part to active"""
         self.status = 'active'
@@ -82,6 +85,9 @@ def exists(string, csvfile, column):
             pass
 
     return False
+
+def get_new_partnumber():
+    return 'DEADBEEF'
 
 def add_part(part, partlist):
     """adds a part to partlist"""
@@ -167,6 +173,49 @@ def add(options):
                 #add file to filelist
                 add_file(fileloc, part.partnumber, filelist)
 
+def new(options):
+    parser = argparse.ArgumentParser(description='make a new managed part',
+                                     prog='cm new')
+    parser.add_argument('-d', '--description', required=True,
+                        help='a description of the new part')
+    parser.add_argument('-p', '--partnumber',
+                        help='optionally give it a partnumber')
+    parser.add_argument('-l', '--location', default=SOURCEDIR,
+                        help='optionally define a location for the part')
+    opts = parser.parse_args(options)
+
+    part = Part()
+    part.description = opts.description
+    if opts.partnumber != None:
+        part.partnumber = opts.partnumber
+    else:
+        part.partnumber = get_new_partnumber()
+
+    # strip punctuation and make a standard filename
+    import re
+    filename = (re.sub(r'[^\w\s]','',part.description).lower().replace(' ','-')
+               + '-' + part.partnumber)
+    part.location = os.path.join(opts.location, filename) + EXTENSIONS[0]
+
+    # save a new file to the location
+    def safe_open_write(path):
+        import errno
+        try:
+            os.makedirs(os.path.dirname(path))
+        except OSError as error:
+            if error.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else: raise
+        return open(path, 'w')
+    
+    with safe_open_write(part.location) as newfile:
+        newfile.write(NEWPASTA)
+        print('saved a new file to ' + part.location)
+    
+    # add the new part
+    add_part(part, openpartlist())
+    add_file(part.location, part.partnumber, openfilelist())
+
 def build(options):
     """puts all active files into /build and generates bill of materials"""
     pass
@@ -182,7 +231,7 @@ def main():
         elif command == 'remove':
             print('not yet implemented')
         elif command == 'new':
-            print('not yet implemented')
+            new(sys.argv[2:])
         else:
             raise UserWarning('no such argument')
     except (IndexError, UserWarning):
