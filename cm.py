@@ -91,7 +91,7 @@ def exists(string, csvfile, column):
     return False
 
 def get_new_partnumber():
-    return 'DEADBEEF'
+    raise Exception('not yet implemented')
 
 def get_active_parts(partlist):
     # move to begining so all of partlist can be read
@@ -111,7 +111,7 @@ def get_active_parts(partlist):
             pass
 
 def get_file_locations_by_partnumber(partnumber, filelist):
-    raise UserWarning('not yet implemented')
+    raise Exception('not yet implemented')
 
 def add_part(part, partlist):
     """adds a part to partlist"""
