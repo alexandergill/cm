@@ -89,6 +89,26 @@ def exists(string, csvfile, column):
 def get_new_partnumber():
     return 'DEADBEEF'
 
+def get_active_parts(partlist):
+    # move to begining so all of partlist can be read
+    partlist.seek(0, os.SEEK_SET)
+
+    import csv
+    reader = csv.reader(partlist)
+
+    # search in STATUS column for 'active'
+    status_column = PARTLISTFORMAT.index(STATUS)
+    partnumber_column = PARTLISTFORMAT.index(PARTNUMBER)
+    for entry in reader:
+        try:
+            if entry[status_column] == 'active':
+                yield entry[partnumber_column]
+        except IndexError: # status_column is not in this row. ignore
+            pass
+
+def get_file_locations_by_partnumber(partnumber, filelist):
+    raise UserWarning('not yet implemented')
+
 def add_part(part, partlist):
     """adds a part to partlist"""
 
@@ -218,7 +238,10 @@ def new(options):
 
 def build(options):
     """puts all active files into /build and generates bill of materials"""
-    pass
+    with openpartlist() as partlist, openfilelist() as filelist:
+        for part in get_active_parts(partlist):
+            for source_loc in get_file_locations_by_partnumber(part.partnumber, filelist):
+                pass
 
 def main():
     """execute when not being loaded as a library"""
@@ -235,7 +258,7 @@ def main():
         else:
             raise UserWarning('no such argument')
     except (IndexError, UserWarning):
-        print('usage error')
+        print('usage: cm <command> <options>\nread documentation for details')
 
 if __name__ == "__main__":
     main()
