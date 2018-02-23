@@ -6,9 +6,13 @@ alexgillygill@gmail.com
 https://gilly.tk
 """
 
+import sys
+
+if sys.version_info[0] < 3:
+    raise Exception('cm needs python 3 or later.')
+
 import argparse
 import glob
-import sys
 import os
 
 PARTLIST = 'partlist.csv'
@@ -255,7 +259,8 @@ def main():
         else:
             raise UserWarning('no such argument')
     except (IndexError, UserWarning):
-        print('usage: cm <command> <options>\nread documentation for details')
+        print('usage: cm <command> <options>\nread documentation for details\n')
+        raise
 
 if __name__ == "__main__":
     main()
