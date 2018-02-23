@@ -132,6 +132,7 @@ def add_file(path, partnumber, filelist):
         # add to end of filelist
         filelist.seek(0, os.SEEK_END)
         writer.writerow([path, partnumber])
+    else: print('file is already in filelist: ' + path)
 
 def parse_args(args):
     """returns the arguments the user gave"""
@@ -219,22 +220,18 @@ def new(options):
 
     # save a new file to the location
     def safe_open_write(path):
-        import errno
-        try:
-            os.makedirs(os.path.dirname(path))
-        except OSError as error:
-            if error.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else: raise
-        return open(path, 'w')
-    
-    with safe_open_write(part.location) as newfile:
-        newfile.write(NEWPASTA)
-        print('saved a new file to ' + part.location)
-    
-    # add the new part
-    add_part(part, openpartlist())
-    add_file(part.location, part.partnumber, openfilelist())
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        return open(path, 'x')
+        
+    try:
+        with safe_open_write(part.location) as newfile:
+            newfile.write(NEWPASTA)
+            print('saved a new file to ' + part.location)
+            print(NEWPASTA)
+            add_part(part, openpartlist())
+            add_file(part.location, part.partnumber, openfilelist())
+    except FileExistsError:
+        print('file {0} already exists in that location'.format(filename))
 
 def build(options):
     """puts all active files into /build and generates bill of materials"""
