@@ -90,8 +90,18 @@ def exists(string, csvfile, column):
 
     return False
 
-def get_new_partnumber():
-    raise Exception('not yet implemented')
+def get_new_partnumber(partlist):
+    """creates a new partnumber unique to partlist"""
+    from random import randrange
+    col = PARTLISTFORMAT.index(PARTNUMBER)
+    # try 60,000 times to get a new partnumber
+    for _ in range(0, 60000):
+        new_partnumber = format(randrange(0xffff), '04x')
+        if not exists(new_partnumber, partlist, col):
+            return new_partnumber
+    # couldn't find a unique one
+    raise Exception("couldn't find a new unique partnumber")
+    #TODO: handle this properly
 
 def get_active_parts(partlist):
     # move to begining so all of partlist can be read
@@ -209,12 +219,14 @@ def new(options):
                         help='optionally define a location for the part')
     opts = parser.parse_args(options)
 
+    partlist = openpartlist()
+
     part = Part()
     part.description = opts.description
     if opts.partnumber != None:
         part.partnumber = opts.partnumber
     else:
-        part.partnumber = get_new_partnumber()
+        part.partnumber = get_new_partnumber(partlist)
 
     # strip punctuation and make a standard filename
     import re
