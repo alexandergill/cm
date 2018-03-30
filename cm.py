@@ -28,7 +28,8 @@ PARTLISTFORMAT = [PARTNUMBER, DESCRIPTION, PARLOC, STATUS]
 FILELISTFORMAT = [PATH, PARTNUMBER]
 
 SOURCEDIR = 'source'
-EXTENSIONS = ['.par', '.pdf', '.dft']
+BUILDDIR  = 'build'
+EXTENSIONS = ['.par', '.pdf', '.dft', '.dxf']
 
 NEWPASTA = 'overwrite this file with a part file'
 
@@ -103,7 +104,7 @@ def get_new_partnumber(partlist):
     raise Exception("couldn't find a new unique partnumber")
     #TODO: handle this properly
 
-def get_active_parts(partlist):
+def get_active_partnumbers(partlist):
     # move to begining so all of partlist can be read
     partlist.seek(0, os.SEEK_SET)
 
@@ -121,7 +122,21 @@ def get_active_parts(partlist):
             pass
 
 def get_file_locations_by_partnumber(partnumber, filelist):
-    raise Exception('not yet implemented')
+    # move to begining of filelist so it can all be read
+    filelist.seek(0, os.SEEK_SET)
+
+    import csv
+    reader = csv.reader(filelist)
+
+    # search in PARTNUMBER column for partnumber
+    partnumber_column = FILELISTFORMAT.index(PARTNUMBER)
+    file_loc_column = FILELISTFORMAT.index(PATH)
+    for entry in reader:
+        try:
+            if entry[partnumber_column] == partnumber:
+                yield entry[file_loc_column]
+        except IndexError: # one of the columns doesn't exist
+            pass
 
 def add_part(part, partlist):
     """adds a part to partlist"""
@@ -206,7 +221,12 @@ def add(options):
 
                     add_part(part, partlist)
                 #add file to filelist
-                add_file(fileloc, part.partnumber, filelist)
+                add_file(fileloc, partnumber, filelist)
+
+def safe_open_write(path):
+    """open a new file when directory may not exist"""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return open(path, 'x')
 
 def new(options):
     parser = argparse.ArgumentParser(description='make a new managed part',
@@ -234,11 +254,7 @@ def new(options):
                + '-' + part.partnumber)
     part.location = os.path.join(opts.location, filename) + EXTENSIONS[0]
 
-    # save a new file to the location
-    def safe_open_write(path):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        return open(path, 'x')
-        
+    # save a new file to the location        
     try:
         with safe_open_write(part.location) as newfile:
             newfile.write(NEWPASTA)
@@ -250,11 +266,17 @@ def new(options):
         print('file {0} already exists in that location'.format(filename))
 
 def build(options):
-    """puts all active files into /build and generates bill of materials"""
+    """puts all active files into BUILDDIR and generates bill of materials"""
+    from shutil import rmtree
+    rmtree(BUILDDIR, ignore_errors=True)
+
     with openpartlist() as partlist, openfilelist() as filelist:
-        for part in get_active_parts(partlist):
-            for source_loc in get_file_locations_by_partnumber(part.partnumber, filelist):
-                pass
+        for partnumber in get_active_partnumbers(partlist):
+            for source_loc in get_file_locations_by_partnumber(partnumber, filelist):
+                desination = os.path.join(BUILDDIR, partnumber)
+                filename = partnumber + os.path.splitext(source_loc)[1]
+                with safe_open_write(os.path.join(desination, filename)) as newfile:
+                    newfile.write('test file')
 
 def main():
     """execute when not being loaded as a library"""
@@ -263,7 +285,7 @@ def main():
         if command == 'add':
             add(sys.argv[2:])
         elif command == 'build':
-            print('not yet implemented')
+            build(sys.argv[2:])
         elif command == 'remove':
             print('not yet implemented')
         elif command == 'new':
