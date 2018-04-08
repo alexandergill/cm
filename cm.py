@@ -29,7 +29,7 @@ FILELISTFORMAT = [PATH, PARTNUMBER]
 
 SOURCEDIR = 'source'
 BUILDDIR  = 'build'
-EXTENSIONS = ['.par', '.pdf', '.dft', '.dxf']
+EXTENSIONS = ['.par', '.pdf', '.dft', '.dxf', '.stl', '.x_t']
 
 NEWPASTA = 'overwrite this file with a part file'
 
