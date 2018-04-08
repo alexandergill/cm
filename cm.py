@@ -266,17 +266,17 @@ def new(options):
         print('file {0} already exists in that location'.format(filename))
 
 def build(options):
-    """puts all active files into BUILDDIR and generates bill of materials"""
-    from shutil import rmtree
+    """puts all active files into BUILDDIR"""
+    from shutil import rmtree, copyfile
     rmtree(BUILDDIR, ignore_errors=True)
 
     with openpartlist() as partlist, openfilelist() as filelist:
         for partnumber in get_active_partnumbers(partlist):
             for source_loc in get_file_locations_by_partnumber(partnumber, filelist):
-                desination = os.path.join(BUILDDIR, partnumber)
+                destination = os.path.join(BUILDDIR, partnumber)
                 filename = partnumber + os.path.splitext(source_loc)[1]
-                with safe_open_write(os.path.join(desination, filename)) as newfile:
-                    newfile.write('test file')
+                os.makedirs(destination, exist_ok=True)
+                copyfile(source_loc, os.path.join(destination, filename))
 
 def main():
     """execute when not being loaded as a library"""
